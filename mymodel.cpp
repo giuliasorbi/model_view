@@ -1,67 +1,47 @@
-#include <QDebug>
-#include <QFont>
-#include <QBrush>
-#include <QTimer>
-#include <QTime>
 #include "mymodel.h"
 
 MyModel::MyModel(QObject *parent)
     :QAbstractTableModel(parent)
 {
-    timer = new QTimer(this);
-    timer->setInterval(1000);
-    connect(timer, SIGNAL(timeout()) , this, SLOT(timerHit()));
-    timer->start();
 }
 
-int MyModel::rowCount(const QModelIndex &parent) const
+int MyModel::rowCount(const QModelIndex& parent) const
 {
-    return 2;
+    return ROWS;
 }
 
-int MyModel::columnCount(const QModelIndex &parent) const
+int MyModel::columnCount(const QModelIndex& parent) const
 {
-    return 3;
+    return COLS;
 }
 
-QVariant MyModel::data(const QModelIndex &index, int role) const
+QVariant MyModel::data(const QModelIndex& index, int role) const
 {
-    int row = index.row();
-    int col = index.column();
-
     if (role == Qt::DisplayRole)
     {
-        if (row == 0 && col == 0)
-        {
-            return QTime::currentTime().toString();
-        }
+        return m_gridData[index.row()][index.column()];
     }
     return QVariant();
 }
 
-QVariant MyModel::headerData(int section, Qt::Orientation orientation, int role) const
+bool MyModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (role == Qt::DisplayRole)
-    {
-        if (orientation == Qt::Horizontal) {
-            switch (section)
-            {
-            case 0:
-                return QString("first");
-            case 1:
-                return QString("second");
-            case 2:
-                return QString("third");
+    if (role == Qt::EditRole) {
+        //save value from editor to member m_gridData
+        m_gridData[index.row()][index.column()] = value.toString();
+
+        QString result;
+        for(int row= 0; row < ROWS; row++) {
+            for(int col= 0; col < COLS; col++) {
+                result += m_gridData[row][col] + " ";
             }
         }
+        emit editCompleted( result );
     }
-    return QVariant();
+    return true;
 }
 
-void MyModel::timerHit()
+Qt::ItemFlags MyModel::flags(const QModelIndex& ) const
 {
-    //we identify the top left cell
-    QModelIndex topLeft = createIndex(0,0);
-    //emit a signal to make the view reread identified data
-    emit dataChanged(topLeft, topLeft);
+    return Qt::ItemIsSelectable |  Qt::ItemIsEditable | Qt::ItemIsEnabled ;
 }

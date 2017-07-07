@@ -2,7 +2,10 @@
 #define MYMODEL_H
 
 #include <QAbstractTableModel>
-#include <QTimer>
+#include <QString>
+
+const int COLS= 3;
+const int ROWS= 2;
 
 class MyModel : public QAbstractTableModel
 {
@@ -10,13 +13,16 @@ class MyModel : public QAbstractTableModel
 
 public:
     MyModel(QObject *parent);
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-    QTimer *timer;
-private slots:
-    void timerHit();
+   int rowCount(const QModelIndex& parent = QModelIndex()) const ;
+   int columnCount(const QModelIndex& parent = QModelIndex()) const;
+   QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+   bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
+   Qt::ItemFlags flags(const QModelIndex& index) const ;
+private:
+    QString m_gridData[ROWS][COLS];
+signals:
+    void editCompleted(const QString&);
 };
+
 
 #endif // MYMODEL_H
